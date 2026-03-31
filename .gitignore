@@ -1,0 +1,51 @@
+# Byte-compiled / cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+
+# Packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Tests / coverage
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
+*.cover
+.hypothesis/
+
+# Type checkers / tools
+.mypy_cache/
+.ruff_cache/
+
+# Secrets & local config (never commit real keys)
+.env
+.env.*
+!.env.example
+*.pem
+**/credentials.json
+**/secrets/
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*~
+
+# Generated crawl outputs (see out/.gitkeep)
+/out/*
+!/out/.gitkeep
+
+# Local state: SQLite DB and app JSON (see state/.gitkeep)
+/state/*
+!/state/.gitkeep
