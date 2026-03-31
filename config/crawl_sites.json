@@ -1,0 +1,50 @@
+{
+  "freshness_days": 3,
+  "max_pages_per_site": 30,
+  "delay_between_requests": 1.0,
+  "respect_robots_txt": true,
+  "api_sources": [
+    {
+      "enabled": true,
+      "type": "greenhouse",
+      "board": "stripe",
+      "company": "Stripe"
+    },
+    {
+      "enabled": true,
+      "type": "greenhouse",
+      "board": "airbnb",
+      "company": "Airbnb"
+    },
+    {
+      "enabled": true,
+      "type": "lever",
+      "company": "netflix",
+      "display_name": "Netflix"
+    },
+    {
+      "enabled": true,
+      "type": "rss",
+      "url": "https://weworkremotely.com/categories/remote-programming-jobs.rss",
+      "company": "We Work Remotely"
+    },
+    {
+      "enabled": true,
+      "type": "jobright",
+      "job_list_urls": [
+        "https://jobright.ai/job-list/h1b-visa-sponsored-python-developer-jobs-in-houston-tx"
+      ],
+      "fetch_company_detail": true,
+      "max_detail_requests": 20,
+      "detail_concurrency": 4
+    }
+  ],
+  "sites": [
+    {
+      "enabled": false,
+      "domain": "careers.example.com",
+      "start_urls": ["https://careers.example.com/jobs"],
+      "extractor": "GenericSchemaOrgExtractor"
+    }
+  ]
+}
