@@ -1,0 +1,56 @@
+name: Crawler CI
+
+on:
+  push:
+    branches: ["main", "master"]
+    paths:
+      - "offerTrackCrawler/**"
+      - "offerTrackModelTraining/orchestration/**"
+      - ".github/workflows/crawler-ci.yml"
+  pull_request:
+    branches: ["main", "master"]
+    paths:
+      - "offerTrackCrawler/**"
+      - "offerTrackModelTraining/orchestration/**"
+      - ".github/workflows/crawler-ci.yml"
+
+jobs:
+  crawler-rust-tests:
+    name: Rust crawler tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: offerTrackCrawler/rust
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cargo test (offertrack-crawler)
+        run: cargo test -p offertrack-crawler
+
+  orchestration-syntax:
+    name: Orchestration syntax checks
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: offerTrackModelTraining
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Shell syntax check
+        run: bash -n orchestration/scripts/run_offline_online_pipeline.sh
+
+      - name: Python compile checks
+        run: |
+          python -m py_compile orchestration/dags/offline_online_pipeline.py
+          python -m py_compile orchestration/scripts/publish_to_milvus.py
+          python -m py_compile orchestration/scripts/write_to_iceberg.py
