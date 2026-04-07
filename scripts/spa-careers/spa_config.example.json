@@ -1,0 +1,61 @@
+{
+  "headless": true,
+  "chromiumChannel": "chrome",
+  "defaultTimeoutMs": 120000,
+  "sources": [
+    {
+      "id": "example-http-json",
+      "mode": "http_json",
+      "sourceTag": "spa:http:greenhouse:acme",
+      "fetchUrls": [
+        "https://boards-api.greenhouse.io/v1/boards/example/jobs?content=true"
+      ],
+      "arrayPath": "jobs",
+      "maxListings": 500,
+      "greenhouseBoard": "example",
+      "preferGreenhouseHostedUrl": true,
+      "fetchGreenhouseJobDetails": false,
+      "greenhouseDetailConcurrency": 5,
+      "fieldMap": {
+        "title": "title",
+        "url": "absolute_url",
+        "company": "company_name",
+        "location": "location.name",
+        "posted_date": "first_published",
+        "jd": "content"
+      }
+    },
+    {
+      "id": "example-json-ld",
+      "company": "Example Corp",
+      "sourceTag": "spa:example-json-ld",
+      "mode": "json_ld",
+      "startUrls": ["https://example.com/careers"],
+      "navigationWaitUntil": "networkidle",
+      "settleMs": 2500,
+      "maxListings": 2000
+    },
+    {
+      "id": "example-intercept",
+      "company": "Another Corp",
+      "sourceTag": "spa:example-api",
+      "mode": "intercept",
+      "startUrls": ["https://careers.example.com/jobs"],
+      "navigationWaitUntil": "domcontentloaded",
+      "settleMs": 20000,
+      "intercept": {
+        "urlIncludes": ["/api/v1/jobs", "/jobs.json"],
+        "arrayPath": "jobs"
+      },
+      "fieldMap": {
+        "title": "title",
+        "url": "apply_url",
+        "location": "location_label",
+        "posted_date": "published_at",
+        "jd": "description_html"
+      },
+      "maxListings": 5000,
+      "maxResponses": 80
+    }
+  ]
+}

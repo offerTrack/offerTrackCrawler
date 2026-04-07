@@ -1,50 +1,66 @@
 {
+  "registry": "registry/employers.json",
   "freshness_days": 3,
   "max_pages_per_site": 30,
   "delay_between_requests": 1.0,
   "respect_robots_txt": true,
+  "registry_html_fallback_from_api_sources": true,
+  "registry_html_fallback_max_sites": 30,
   "api_sources": [
-    {
-      "enabled": true,
-      "type": "greenhouse",
-      "board": "stripe",
-      "company": "Stripe"
-    },
-    {
-      "enabled": true,
-      "type": "greenhouse",
-      "board": "airbnb",
-      "company": "Airbnb"
-    },
-    {
-      "enabled": true,
-      "type": "lever",
-      "company": "netflix",
-      "display_name": "Netflix"
-    },
     {
       "enabled": true,
       "type": "rss",
       "url": "https://weworkremotely.com/categories/remote-programming-jobs.rss",
-      "company": "We Work Remotely"
+      "company": "We Work Remotely (Engineering)"
+    },
+    {
+      "enabled": true,
+      "type": "rss",
+      "url": "https://weworkremotely.com/categories/remote-customer-support-jobs.rss",
+      "company": "We Work Remotely (Customer Support)"
+    },
+    {
+      "enabled": true,
+      "type": "rss",
+      "url": "https://weworkremotely.com/categories/remote-sales-and-marketing-jobs.rss",
+      "company": "We Work Remotely (Sales & Marketing)"
+    },
+    {
+      "enabled": true,
+      "type": "rss",
+      "url": "https://weworkremotely.com/categories/remote-design-jobs.rss",
+      "company": "We Work Remotely (Design)"
+    },
+    {
+      "enabled": true,
+      "type": "rss",
+      "url": "https://weworkremotely.com/categories/remote-devops-sysadmin-jobs.rss",
+      "company": "We Work Remotely (DevOps & Sysadmin)"
     },
     {
       "enabled": true,
       "type": "jobright",
+      "company": "Jobright (multi-vertical US lists)",
       "job_list_urls": [
+        "https://jobright.ai/jobs/nursing-jobs-in-united-states",
+        "https://jobright.ai/jobs/healthcare-jobs-in-united-states",
+        "https://jobright.ai/jobs/teaching-jobs-in-united-states",
+        "https://jobright.ai/jobs/construction-jobs-in-united-states",
+        "https://jobright.ai/jobs/electrician-jobs-in-united-states",
+        "https://jobright.ai/jobs/mechanic-jobs-in-united-states",
+        "https://jobright.ai/jobs/truck-driver-jobs-in-united-states",
+        "https://jobright.ai/jobs/warehouse-jobs-in-united-states",
+        "https://jobright.ai/jobs/hospitality-jobs-in-united-states",
+        "https://jobright.ai/jobs/retail-jobs-in-united-states",
+        "https://jobright.ai/jobs/manufacturing-jobs-in-united-states",
+        "https://jobright.ai/jobs/accounting-jobs-in-united-states",
+        "https://jobright.ai/jobs/python-developer-jobs-in-united-states",
         "https://jobright.ai/job-list/h1b-visa-sponsored-python-developer-jobs-in-houston-tx"
       ],
-      "fetch_company_detail": true,
-      "max_detail_requests": 20,
+      "fetch_company_detail": false,
+      "max_detail_requests": 0,
       "detail_concurrency": 4
     }
   ],
-  "sites": [
-    {
-      "enabled": false,
-      "domain": "careers.example.com",
-      "start_urls": ["https://careers.example.com/jobs"],
-      "extractor": "GenericSchemaOrgExtractor"
-    }
-  ]
+  "sites": []
 }

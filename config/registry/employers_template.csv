@@ -1,0 +1,5 @@
+company,tier,ats,slug,career_url,enabled
+Example SaaS,series_a,greenhouse,exampleco,https://example.com/careers,true
+Example Startup,series_a,lever,examplelever,https://jobs.example.com,true
+Example Ashby,growth,ashby,exampleashby,https://jobs.example.com,true
+Remote board,smb,rss,https://example.com/feed.xml,,true

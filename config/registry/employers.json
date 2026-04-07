@@ -1,0 +1,339 @@
+{
+  "employers": [
+    {
+      "id": "stripe",
+      "tier": "bigtech",
+      "vertical": "technology",
+      "company": "Stripe",
+      "ats": "greenhouse",
+      "board": "stripe",
+      "career_url": "https://stripe.com/jobs",
+      "enabled": true
+    },
+    {
+      "id": "airbnb",
+      "tier": "bigtech",
+      "vertical": "technology",
+      "company": "Airbnb",
+      "ats": "greenhouse",
+      "board": "airbnb",
+      "career_url": "https://careers.airbnb.com",
+      "enabled": true
+    },
+    {
+      "id": "amazon_jobs_us",
+      "tier": "bigtech",
+      "vertical": "technology",
+      "company": "Amazon (amazon.jobs listings)",
+      "ats": "amazon_jobs",
+      "locale_prefix": "/en",
+      "base_query": "",
+      "loc_query": "United States",
+      "result_limit": 100,
+      "max_jobs": 800,
+      "sort": "recent",
+      "page_delay_ms": 400,
+      "career_url": "https://www.amazon.jobs",
+      "enabled": true
+    },
+    {
+      "id": "blackstone_workday",
+      "tier": "bigtech",
+      "vertical": "finance",
+      "company": "Blackstone",
+      "ats": "workday",
+      "workday_host": "blackstone.wd1.myworkdayjobs.com",
+      "cxs_org": "blackstone",
+      "cxs_site": "Blackstone_Careers",
+      "locale": "en-US",
+      "max_jobs": 600,
+      "page_limit": 20,
+      "page_delay_ms": 400,
+      "career_url": "https://www.blackstone.com/careers",
+      "enabled": true
+    },
+    {
+      "id": "dropbox",
+      "tier": "bigtech",
+      "vertical": "technology",
+      "company": "Dropbox",
+      "ats": "greenhouse",
+      "board": "dropbox",
+      "career_url": "https://www.dropbox.com/jobs",
+      "enabled": true
+    },
+    {
+      "id": "databricks",
+      "tier": "bigtech",
+      "vertical": "technology",
+      "company": "Databricks",
+      "ats": "greenhouse",
+      "board": "databricks",
+      "career_url": "https://www.databricks.com/company/careers",
+      "enabled": true
+    },
+    {
+      "id": "figma",
+      "tier": "growth",
+      "vertical": "technology",
+      "company": "Figma",
+      "ats": "greenhouse",
+      "board": "figma",
+      "career_url": "https://www.figma.com/careers",
+      "enabled": true
+    },
+    {
+      "id": "vercel_gh",
+      "tier": "growth",
+      "vertical": "technology",
+      "company": "Vercel",
+      "ats": "greenhouse",
+      "board": "vercel",
+      "career_url": "https://vercel.com/careers",
+      "enabled": true
+    },
+    {
+      "id": "reddit",
+      "tier": "bigtech",
+      "vertical": "technology",
+      "company": "Reddit",
+      "ats": "greenhouse",
+      "board": "reddit",
+      "career_url": "https://www.redditinc.com/careers",
+      "enabled": true
+    },
+    {
+      "id": "netflix",
+      "tier": "bigtech",
+      "vertical": "media",
+      "company": "Netflix",
+      "ats": "lever",
+      "lever_company": "netflix",
+      "min_expected_jobs": 1,
+      "career_url": "https://jobs.netflix.com",
+      "enabled": true
+    },
+    {
+      "id": "instacart",
+      "tier": "bigtech",
+      "vertical": "logistics_retail",
+      "company": "Instacart",
+      "ats": "greenhouse",
+      "board": "instacart",
+      "career_url": "https://careers.instacart.com",
+      "enabled": true
+    },
+    {
+      "id": "lyft",
+      "tier": "bigtech",
+      "vertical": "mobility",
+      "company": "Lyft",
+      "ats": "greenhouse",
+      "board": "lyft",
+      "career_url": "https://www.lyft.com/careers",
+      "enabled": true
+    },
+    {
+      "id": "block",
+      "tier": "bigtech",
+      "vertical": "fintech",
+      "company": "Block",
+      "ats": "greenhouse",
+      "board": "block",
+      "career_url": "https://block.xyz/careers",
+      "enabled": true
+    },
+    {
+      "id": "opendoor",
+      "tier": "growth",
+      "vertical": "realestate",
+      "company": "Opendoor",
+      "ats": "greenhouse",
+      "board": "opendoor",
+      "career_url": "https://www.opendoor.com/careers",
+      "enabled": true
+    },
+    {
+      "id": "onemedical",
+      "tier": "growth",
+      "vertical": "healthcare",
+      "company": "One Medical",
+      "ats": "greenhouse",
+      "board": "onemedical",
+      "career_url": "https://www.onemedical.com/careers",
+      "enabled": true
+    },
+    {
+      "id": "headway",
+      "tier": "series_a",
+      "vertical": "healthcare",
+      "company": "Headway",
+      "ats": "greenhouse",
+      "board": "headway",
+      "career_url": "https://headway.co/careers",
+      "enabled": true
+    },
+    {
+      "id": "khanacademy",
+      "tier": "nonprofit",
+      "vertical": "education",
+      "company": "Khan Academy",
+      "ats": "greenhouse",
+      "board": "khanacademy",
+      "career_url": "https://www.khanacademy.org/careers",
+      "enabled": true
+    },
+    {
+      "id": "coursera",
+      "tier": "growth",
+      "vertical": "education",
+      "company": "Coursera",
+      "ats": "greenhouse",
+      "board": "coursera",
+      "career_url": "https://about.coursera.org/careers",
+      "enabled": true
+    },
+    {
+      "id": "duolingo",
+      "tier": "growth",
+      "vertical": "education",
+      "company": "Duolingo",
+      "ats": "greenhouse",
+      "board": "duolingo",
+      "career_url": "https://careers.duolingo.com",
+      "enabled": true
+    },
+    {
+      "id": "robinhood",
+      "tier": "growth",
+      "vertical": "fintech",
+      "company": "Robinhood",
+      "ats": "greenhouse",
+      "board": "robinhood",
+      "career_url": "https://careers.robinhood.com",
+      "enabled": true
+    },
+    {
+      "id": "coinbase",
+      "tier": "bigtech",
+      "vertical": "fintech",
+      "company": "Coinbase",
+      "ats": "greenhouse",
+      "board": "coinbase",
+      "career_url": "https://www.coinbase.com/careers",
+      "enabled": true
+    },
+    {
+      "id": "chime",
+      "tier": "growth",
+      "vertical": "fintech",
+      "company": "Chime",
+      "ats": "greenhouse",
+      "board": "chime",
+      "career_url": "https://www.chime.com/careers",
+      "enabled": true
+    },
+    {
+      "id": "sofi",
+      "tier": "growth",
+      "vertical": "fintech",
+      "company": "SoFi",
+      "ats": "greenhouse",
+      "board": "sofi",
+      "career_url": "https://www.sofi.com/careers",
+      "enabled": true
+    },
+    {
+      "id": "affirm",
+      "tier": "growth",
+      "vertical": "fintech",
+      "company": "Affirm",
+      "ats": "greenhouse",
+      "board": "affirm",
+      "career_url": "https://www.affirm.com/careers",
+      "enabled": true
+    },
+    {
+      "id": "linear_ashby",
+      "tier": "growth",
+      "vertical": "technology",
+      "company": "Linear",
+      "ats": "ashby",
+      "board": "linear",
+      "career_url": "https://linear.app/careers",
+      "enabled": true
+    },
+    {
+      "id": "ramp_ashby",
+      "tier": "series_a",
+      "vertical": "fintech",
+      "company": "Ramp",
+      "ats": "ashby",
+      "board": "ramp",
+      "career_url": "https://ramp.com/careers",
+      "enabled": true
+    },
+    {
+      "id": "icims_template_1",
+      "tier": "growth",
+      "vertical": "other",
+      "company": "Example iCIMS Company",
+      "ats": "icims",
+      "icims_jobs_url": "https://example.icims.com/jobs/search",
+      "career_url": "https://example.icims.com/jobs/search",
+      "enabled": false
+    },
+    {
+      "id": "bamboohr_template_1",
+      "tier": "growth",
+      "vertical": "other",
+      "company": "Example BambooHR Company",
+      "ats": "bamboohr",
+      "bamboohr_subdomain": "example",
+      "career_url": "https://example.bamboohr.com/careers",
+      "enabled": false
+    },
+    {
+      "id": "smartrecruiters_template_1",
+      "tier": "growth",
+      "vertical": "other",
+      "company": "Example SmartRecruiters Company",
+      "ats": "smartrecruiters",
+      "smartrecruiters_company_id": "example",
+      "career_url": "https://careers.smartrecruiters.com/example",
+      "enabled": false
+    },
+    {
+      "id": "workable_template_1",
+      "tier": "growth",
+      "vertical": "other",
+      "company": "Example Workable Company",
+      "ats": "workable",
+      "workable_subdomain": "example",
+      "workable_api_token_env": "WORKABLE_EXAMPLE_TOKEN",
+      "career_url": "https://example.workable.com",
+      "enabled": false
+    },
+    {
+      "id": "series_a_template",
+      "tier": "series_a",
+      "vertical": "other",
+      "company": "Example Seed/Series A (template)",
+      "ats": "lever",
+      "lever_company": "YOUR_LEVER_SLUG",
+      "career_url": "https://example.com/careers",
+      "enabled": false
+    },
+    {
+      "id": "smb_schema_template",
+      "tier": "smb",
+      "vertical": "other",
+      "company": "Example SMB careers site",
+      "ats": "site",
+      "domain": "careers.example.com",
+      "start_urls": ["https://careers.example.com/jobs"],
+      "extractor": "GenericSchemaOrgExtractor",
+      "enabled": false
+    }
+  ]
+}
