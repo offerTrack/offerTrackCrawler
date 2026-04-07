@@ -2,65 +2,101 @@
 
 **Open-source** job crawling and local persistence: exports normalized JSON and SQLite for downstream use. Products such as offerTrack can consume these artifacts in a **private repository** for embeddings, RAG, batch jobs, and matching logic.
 
-**Closed-source** pieces (document parsing/chunking, embeddings, vector stores, map/batch jobs, full RAG, and model training) live in a **separate private repo**; they are not part of this codebase.
+## Same change → three places (do not edit in isolation)
 
-**The crawler still runs as before.** Removing embedding/RAG code from `src/` does not affect `crawl_jobs.py` or `src/crawler/`. Install `requirements.txt`, edit `config/crawl_sites.json`, then run the commands below from the repository root. No ML stack is required to crawl.
+Integration with **offerTrackPlatform** + **offerTrackModelTraining** is documented as one pipeline. If you change export shape, ingest API, or `Job.id` rules, update **crawler docs + Rust CLIs**, **platform admin routes + OpenAPI**, and **ModelTraining docs/scripts** together. **Hub:** [../README.md](../README.md) (monorepo checklist).
+
+**Stack:** **Rust** (`rust/`): **`offertrack-crawl`** (Greenhouse, Lever, **Ashby**, RSS/Atom, Jobright, **amazon_jobs**, **workday** + HTML `sites`), **`offertrack-merge-jobs`** (merge two `jobs.json`-shaped feeds with canonical URL dedupe), **`offertrack-career-discover`**, **`offertrack-discovery-merge`**, **`offertrack-push`**, **`offertrack-registry-import`**. **Node + Playwright** (`scripts/spa-careers/`) for **SPA / XHR** employers that need a headless layer; output merges with the Rust crawl (see [docs/global-job-coverage.md](docs/global-job-coverage.md)). Employer scale-out: **`config/registry/employers.json`** (see [config/registry/README.md](config/registry/README.md)). **Change-one, check-three:** [../README.md](../README.md).
+
+**Closed-source** pieces (document parsing/chunking, embeddings, vector stores, map/batch jobs, full RAG, and model training) live in a **separate private repo**; they are not part of this codebase.
 
 ## Features
 
-- **Crawler** (`src/crawler/`, `crawl_jobs.py`): Greenhouse, Lever, RSS/Atom, Jobright list pages, optional HTML + Schema.org extraction.
-- **Storage**: SQLite deduplicated upsert by **source + canonical URL**; JSON export.
+- **Rust crawler** (`rust/offertrack-crawler/`): `api_sources` (Greenhouse, Lever, Ashby, RSS, Jobright, **`amazon_jobs`**) + optional HTML `sites` (BFS, rate limit, optional `robots.txt`); **`out/jobs.json`** + **`state/jobs.db`**. Optional **`--csv`** writes **`out/jobs.csv`**; **`--csv-include-jd`** adds a `jd` column. **`offertrack-merge-jobs`** can **`--in-place`** merge an extra feed into **`jobs.json`** (pipe **`scripts/spa-careers/crawl.mjs`** with **`--extra -`**). See [docs/global-job-coverage.md](docs/global-job-coverage.md).
+- **Rust push** (`offertrack-push`): upload full `jobs.json` to the platform admin ingest API.
+- **Default sources** aim for **multiple industries** (not dev-only): WWR RSS for support / sales / design / DevOps; Jobright lists for nursing, trades, warehouse, hospitality, retail, etc.; registry employers span **healthcare, education, fintech, logistics, mobility, media** (see [docs/global-job-coverage.md](docs/global-job-coverage.md)).
+- **Merge + dedupe**: All feeds are **unioned**, then collapsed by **canonical apply URL**; `source` becomes a merged label (e.g. `greenhouse:stripe | jobright.ai`). **Storage**: SQLite row key + **`job_id`** use **canonical URL only** (UUID v5 over SHA-256 of canonical URL).
 
 ## Requirements
 
-- Python **3.10+** (3.11 recommended)
-- Network access for crawling public sources
+- **Rust:** current **stable** toolchain (`rust/rust-toolchain.toml` pins `stable`; run `rustup update stable` if Cargo errors on newer crate manifests).
+- Network access for crawling public sources.
 
-## Install
-
-```bash
-python -m venv .venv
-source .venv/bin/activate   # Windows: .venv\Scripts\activate
-pip install -r requirements.txt
-```
-
-Development and tests:
+## Career discovery (before expanding the registry)
 
 ```bash
-pip install -r requirements-dev.txt
+cd rust
+cargo run --release -p offertrack-crawler --bin offertrack-career-discover -- \
+  ../config/discovery/example-seeds.csv -o ../out/discovered-careers.csv
 ```
 
-See `requirements.txt` and `requirements-dev.txt` for dependencies.
+Edit `config/discovery/example-seeds.csv` (or use a domain-per-line file). For rows with `detected_ats` in {greenhouse, lever, ashby, workday, amazon_jobs}, run **`offertrack-discovery-merge`** to append into a copy of `employers.json` (see [docs/global-job-coverage.md](docs/global-job-coverage.md)). For **`unknown_html`** / SPA career sites, use **`scripts/spa-careers/`** (Playwright) and **`offertrack-merge-jobs`** to combine with `out/jobs.json` (documented in the same guide).
+
+## Build — Rust
+
+```bash
+cd rust
+cargo build --release
+# crawl (paths relative to offerTrackCrawler repo root):
+cargo run --release -p offertrack-crawler --bin offertrack-crawl -- \
+  --config ../config/crawl_sites.json --out ../out/jobs.json --db ../state/jobs.db
+```
+
+**Minimal export**:
+
+```bash
+cargo run --release -p offertrack-crawler --bin offertrack-crawl -- \
+  --config ../config/crawl_sites.json --out ../out/jobs_min.json --db ../state/jobs.db --minimal-export
+```
 
 ## Layout
 
 | Path | Purpose |
 |------|---------|
-| `crawl_jobs.py` | CLI: load config, crawl, write `out/` and SQLite |
-| `config/crawl_sites.json` | Source definitions and crawl settings |
-| `src/crawler/` | Fetch, extract, schedule, persist |
-| `docs/` | Draft specs (e.g. crawler, interfaces) |
+| `rust/` | **Rust** workspace: `offertrack-crawl`, `offertrack-merge-jobs`, `offertrack-push`, `offertrack-registry-import` |
+| `scripts/spa-careers/` | SPA / http_json / Playwright → **stdout** JSON; pipe to **`offertrack-merge-jobs --extra - --in-place`** |
+| `scripts/crawl-with-spa-merge.sh` | Crawl then merge SPA feed into **`out/jobs.json`** (single artifact) |
+| `rust/offertrack-crawler/src/html/` | HTML `sites`: Schema.org JSON-LD + link discovery |
+| `config/crawl_sites.json` | Global options + `api_sources` / `sites` + optional `registry` path |
+| `config/registry/employers.json` | Employer list (FAANG → Series A → SMB templates); merged into crawl |
+| `docs/` | [offertrack-platform.md](docs/offertrack-platform.md), [global-job-coverage.md](docs/global-job-coverage.md) |
 
-Generated files are **not** committed by default (see `.gitignore`): `out/`, `state/`, etc. The repo keeps `out/.gitkeep` and `state/.gitkeep` so directories exist after clone.
+Generated files are **not** committed by default (see `.gitignore`): `out/`, `state/`, `rust/target/`, etc.
 
 ## Usage: crawl jobs
 
-Run these steps **from the repository root** (where `crawl_jobs.py` lives).
+1. Edit `config/crawl_sites.json`: `api_sources` and optional HTML under `sites` (`extractor`: `GenericSchemaOrgExtractor`).
+2. Run (from `rust/` as above, or with paths relative to repo root).
 
-1. Edit `config/crawl_sites.json`: set `type` under `api_sources` (`greenhouse` / `lever` / `rss` / `atom` / `jobright`), toggle `enabled`; optional HTML crawling under `sites`.
-2. Run:
+Run summary JSON includes `runner`, `total_after_freshness_before_dedup`, `dedup_removed_duplicate_urls`, `total_merged_unique_listings`, `total_crawled_after_fresh_filter` (same as merged count), `csv_path`, `api_sources_count`, `sites_count`, `registry_loaded`, `registry_path`, `html_sites_jobs_before_fresh_filter`, `db_inserted_new`, `db_updated_existing`, etc.
 
-```bash
-python crawl_jobs.py --config config/crawl_sites.json --out out/jobs.json --db state/jobs.db
-```
+### Employer registry (many companies)
 
-3. **Minimal export** for downstream models (writes DB first, then reads `first_seen_at` from SQLite):
+- Edit **`config/registry/employers.json`** or generate from CSV:
 
 ```bash
-python crawl_jobs.py --minimal-export --out out/jobs_min.json --db state/jobs.db
+cd rust
+cargo run -p offertrack-crawler --bin offertrack-registry-import -- \
+  ../config/registry/employers_template.csv \
+  -o ../config/registry/employers.generated.json
 ```
 
-4. The CLI prints JSON stats: `total_crawled_after_fresh_filter`, `db_inserted_new`, `db_updated_existing`, `db_recent_jobs`, etc.
+- `crawl_sites.json` references the registry with `"registry": "registry/employers.json"` (relative to the **`config/`** folder that contains `crawl_sites.json`).
+- Override path: `offertrack-crawl --registry /path/to/employers.json`.
+
+### Push jobs to offerTrackPlatform
+
+With the **offerTrack** backend running (local or staging), POST the full `out/jobs.json` to `POST /api/v1/admin/ingest/crawler-jobs`:
+
+```bash
+export OFFERTRACK_API_URL=http://localhost:3000
+# export OFFERTRACK_ADMIN_KEY=...   # when platform ADMIN_API_KEY is set
+cd rust
+cargo run --release -p offertrack-crawler --bin offertrack-push -- ../out/jobs.json
+# dry-run: add --dry-run
+```
+
+Details: [docs/offertrack-platform.md](docs/offertrack-platform.md).
 
 ### Jobright
 
@@ -79,13 +115,14 @@ Each row typically includes: `job_id` (stable deterministic id), `title`, `compa
 ## Tests
 
 ```bash
-pytest tests/ -q
+cd rust/offertrack-crawler
+cargo test
 ```
 
 ## What this open repo includes
 
-- `crawl_jobs.py`, `src/crawler/`, sample `config/crawl_sites.json`, and the crawl/export behavior described here.
-- `tests/` for the above, `docs/`, `requirements*.txt`, `.env.example`, `LICENSE`, `NOTICE`, and this README.
+- Rust crate (`rust/offertrack-crawler/`): `offertrack-crawl`, `offertrack-push`, sample `config/crawl_sites.json`, and the crawl/export behavior described here.
+- `docs/`, `.env.example`, `LICENSE`, `NOTICE`, and this README.
 
 **Typically gitignored**: local `out/`, `state/`, `.env`, keys, and generated databases.
 

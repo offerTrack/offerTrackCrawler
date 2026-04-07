@@ -49,3 +49,6 @@ htmlcov/
 # Local state: SQLite DB and app JSON (see state/.gitkeep)
 /state/*
 !/state/.gitkeep
+
+# Rust workspace
+/rust/target/

@@ -1,0 +1,4 @@
+[toolchain]
+# Crates.io may pull deps that need a current stable Cargo (edition 2024 manifests).
+channel = "stable"
+components = ["rustfmt", "clippy"]

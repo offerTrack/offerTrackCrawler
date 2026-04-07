@@ -1,0 +1,11 @@
+{
+  "name": "offertrack-spa-careers",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "crawl": "node crawl.mjs"
+  },
+  "dependencies": {
+    "playwright": "^1.49.1"
+  }
+}
