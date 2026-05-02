@@ -336,6 +336,8 @@ async fn main() -> Result<()> {
 
     let stats = storage.upsert_jobs(&api_jobs)?;
 
+    let crawl_exported_at_utc = Utc::now().to_rfc3339();
+
     let output_json = if args.minimal_export {
         let mut rows: Vec<MinimalRow> = Vec::new();
         for j in &api_jobs {
@@ -344,12 +346,20 @@ async fn main() -> Result<()> {
                     job_id: j.job_id.clone(),
                     jd: desc.unwrap_or_else(|| j.description.clone().unwrap_or_default()),
                     first_seen_at: first_seen,
+                    crawl_exported_at_utc: crawl_exported_at_utc.clone(),
                 });
             }
         }
         serde_json::to_string_pretty(&rows)?
     } else {
-        let rows: Vec<ExportRow> = api_jobs.iter().map(ExportRow::from).collect();
+        let rows: Vec<ExportRow> = api_jobs
+            .iter()
+            .map(|j| {
+                let mut r = ExportRow::from(j);
+                r.crawl_exported_at_utc = crawl_exported_at_utc.clone();
+                r
+            })
+            .collect();
         serde_json::to_string_pretty(&rows)?
     };
 
@@ -357,7 +367,7 @@ async fn main() -> Result<()> {
 
     let csv_path = args.out.with_extension("csv");
     let csv_written = if args.csv {
-        write_merged_jobs_csv(&csv_path, &api_jobs, args.csv_include_jd)?;
+        write_merged_jobs_csv(&csv_path, &api_jobs, args.csv_include_jd, &crawl_exported_at_utc)?;
         Some(csv_path.to_string_lossy().to_string())
     } else {
         None
@@ -368,6 +378,7 @@ async fn main() -> Result<()> {
 
     let summary = serde_json::json!({
         "runner": "rust-offertrack-crawl",
+        "crawl_exported_at_utc": crawl_exported_at_utc,
         "total_after_freshness_before_dedup": total_before_dedup,
         "dedup_removed_duplicate_urls": dedup_removed,
         "total_merged_unique_listings": api_jobs.len(),
@@ -399,14 +410,23 @@ async fn main() -> Result<()> {
     Ok(())
 }
 
-fn write_merged_jobs_csv(path: &Path, jobs: &[JobPosting], include_jd: bool) -> Result<()> {
+fn write_merged_jobs_csv(path: &Path, jobs: &[JobPosting], include_jd: bool, crawl_exported_at_utc: &str) -> Result<()> {
     if let Some(dir) = path.parent() {
         std::fs::create_dir_all(dir).ok();
     }
     let mut wtr = Writer::from_path(path)
         .with_context(|| format!("open csv {}", path.display()))?;
 
-    let mut header = vec!["job_id", "title", "company", "location", "url", "posted_date", "source"];
+    let mut header = vec![
+        "job_id",
+        "title",
+        "company",
+        "location",
+        "url",
+        "posted_date",
+        "crawl_exported_at_utc",
+        "source",
+    ];
     if include_jd {
         header.push("jd");
     }
@@ -424,6 +444,7 @@ fn write_merged_jobs_csv(path: &Path, jobs: &[JobPosting], include_jd: bool) -> 
             j.location.clone().unwrap_or_default(),
             j.url.clone(),
             posted,
+            crawl_exported_at_utc.to_string(),
             j.source.clone().unwrap_or_default(),
         ];
         if include_jd {
@@ -554,7 +575,7 @@ mod tests {
         };
         let dir = std::env::temp_dir();
         let path = dir.join("test_no_jd.csv");
-        write_merged_jobs_csv(&path, &[job], false).unwrap();
+        write_merged_jobs_csv(&path, &[job], false, "2026-05-01T12:00:00+00:00").unwrap();
         let content = std::fs::read_to_string(&path).unwrap();
         assert!(content.contains("SWE"));
         assert!(!content.contains("jd"), "jd column should not appear");
@@ -573,7 +594,7 @@ mod tests {
         job.description = Some("Great JD text".into());
         let dir = std::env::temp_dir();
         let path = dir.join("test_with_jd.csv");
-        write_merged_jobs_csv(&path, &[job], true).unwrap();
+        write_merged_jobs_csv(&path, &[job], true, "2026-05-01T12:00:00+00:00").unwrap();
         let content = std::fs::read_to_string(&path).unwrap();
         assert!(content.contains("Great JD text"));
         let _ = std::fs::remove_file(&path);

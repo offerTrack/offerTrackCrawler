@@ -89,7 +89,7 @@ fn read_extra_rows(extra: &Option<PathBuf>) -> Result<Vec<ExportRow>> {
     }
 }
 
-fn write_merged_jobs_csv(path: &Path, jobs: &[JobPosting], include_jd: bool) -> Result<()> {
+fn write_merged_jobs_csv(path: &Path, jobs: &[JobPosting], include_jd: bool, crawl_exported_at_utc: &str) -> Result<()> {
     if let Some(dir) = path.parent() {
         std::fs::create_dir_all(dir).ok();
     }
@@ -103,6 +103,7 @@ fn write_merged_jobs_csv(path: &Path, jobs: &[JobPosting], include_jd: bool) -> 
             "location",
             "url",
             "posted_date",
+            "crawl_exported_at_utc",
             "source",
             "jd",
         ])?;
@@ -116,6 +117,7 @@ fn write_merged_jobs_csv(path: &Path, jobs: &[JobPosting], include_jd: bool) -> 
                 &j.posted_date
                     .map(|d| d.format("%Y-%m-%dT%H:%M:%S").to_string())
                     .unwrap_or_default(),
+                crawl_exported_at_utc,
                 j.source.as_deref().unwrap_or(""),
                 &j.description.clone().unwrap_or_default(),
             ])?;
@@ -128,6 +130,7 @@ fn write_merged_jobs_csv(path: &Path, jobs: &[JobPosting], include_jd: bool) -> 
             "location",
             "url",
             "posted_date",
+            "crawl_exported_at_utc",
             "source",
         ])?;
         for j in jobs {
@@ -140,6 +143,7 @@ fn write_merged_jobs_csv(path: &Path, jobs: &[JobPosting], include_jd: bool) -> 
                 &j.posted_date
                     .map(|d| d.format("%Y-%m-%dT%H:%M:%S").to_string())
                     .unwrap_or_default(),
+                crawl_exported_at_utc,
                 j.source.as_deref().unwrap_or(""),
             ])?;
         }
@@ -189,7 +193,15 @@ fn main() -> Result<()> {
     if let Some(dir) = out_path.parent() {
         std::fs::create_dir_all(dir).ok();
     }
-    let rows: Vec<ExportRow> = jobs.iter().map(ExportRow::from).collect();
+    let crawl_exported_at_utc = Utc::now().to_rfc3339();
+    let rows: Vec<ExportRow> = jobs
+        .iter()
+        .map(|j| {
+            let mut r = ExportRow::from(j);
+            r.crawl_exported_at_utc = crawl_exported_at_utc.clone();
+            r
+        })
+        .collect();
     std::fs::write(
         &out_path,
         serde_json::to_string_pretty(&rows).context("serialize jobs")?,
@@ -198,7 +210,7 @@ fn main() -> Result<()> {
 
     let csv_path = out_path.with_extension("csv");
     let csv_written = if args.csv {
-        write_merged_jobs_csv(&csv_path, &jobs, args.csv_include_jd)?;
+        write_merged_jobs_csv(&csv_path, &jobs, args.csv_include_jd, &crawl_exported_at_utc)?;
         Some(csv_path.to_string_lossy().to_string())
     } else {
         None
@@ -206,6 +218,7 @@ fn main() -> Result<()> {
 
     let summary = serde_json::json!({
         "runner": "rust-offertrack-merge-jobs",
+        "crawl_exported_at_utc": crawl_exported_at_utc,
         "base_rows": n_base,
         "extra_rows": n_extra,
         "concatenated_before_dedup": before_dedup,

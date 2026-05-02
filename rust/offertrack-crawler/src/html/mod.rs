@@ -8,7 +8,7 @@ use std::time::{Duration, Instant};
 
 use robots_txt::{matcher::SimpleMatcher, parts::Robots};
 use serde_json::Value;
-use tokio::sync::Mutex;
+use tokio::sync::{Mutex, Semaphore};
 use url::Url;
 
 pub use schema_org::extract_jobs_from_html;
@@ -88,17 +88,21 @@ impl RobotsTxtCache {
         };
         let path = parsed.path();
 
-        let body = {
+        let cached = {
+            let g = self.inner.lock().await;
+            g.get(&domain).cloned()
+        };
+        let body = if let Some(v) = cached {
+            v
+        } else {
+            let robots_url = format!("{}://{}/robots.txt", parsed.scheme(), domain);
+            let fetched = match client.get(&robots_url).timeout(Duration::from_secs(10)).send().await {
+                Ok(r) if r.status() == 200 => r.text().await.ok(),
+                _ => None,
+            };
             let mut g = self.inner.lock().await;
-            if !g.contains_key(&domain) {
-                let robots_url = format!("{}://{}/robots.txt", parsed.scheme(), domain);
-                let fetched = match client.get(&robots_url).timeout(Duration::from_secs(10)).send().await {
-                    Ok(r) if r.status() == 200 => r.text().await.ok(),
-                    _ => None,
-                };
-                g.insert(domain.clone(), fetched);
-            }
-            g.get(&domain).cloned().flatten()
+            g.entry(domain.clone()).or_insert_with(|| fetched.clone());
+            fetched
         };
 
         let Some(text) = body else {
@@ -207,6 +211,7 @@ pub async fn crawl_html_sites(
 ) -> Vec<JobPosting> {
     let robots = Arc::new(RobotsTxtCache::new());
     let rate = Arc::new(Mutex::new(HashMap::<String, Instant>::new()));
+    let limiter = Arc::new(Semaphore::new(settings.max_concurrent_requests.max(1)));
 
     let mut handles = Vec::new();
     for site in sites {
@@ -253,8 +258,10 @@ pub async fn crawl_html_sites(
         let settings = settings.clone();
         let robots = robots.clone();
         let rate = rate.clone();
+        let limiter = limiter.clone();
         let domain = domain.to_string();
         handles.push(tokio::spawn(async move {
+            let _permit = limiter.acquire_owned().await.ok();
             crawl_one_site(
                 &client,
                 &settings,
