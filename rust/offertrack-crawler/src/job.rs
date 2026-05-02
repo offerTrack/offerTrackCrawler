@@ -125,6 +125,9 @@ pub struct ExportRow {
     pub url: String,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub posted_date: Option<String>,
+    /// UTC instant (RFC3339) when this `jobs.json` export was written; same value for all rows in one crawl run.
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub crawl_exported_at_utc: String,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub source: Option<String>,
     #[serde(default)]
@@ -161,6 +164,7 @@ impl From<&JobPosting> for ExportRow {
             location: j.location.clone(),
             url: j.url.clone(),
             posted_date: j.posted_date.map(|d| d.format("%Y-%m-%dT%H:%M:%S").to_string()),
+            crawl_exported_at_utc: String::new(),
             source: j.source.clone(),
             jd: j.description.clone().unwrap_or_default(),
         }
@@ -343,6 +347,7 @@ mod tests {
             location: None,
             url: "https://example.com".into(),
             posted_date: None,
+            crawl_exported_at_utc: String::new(),
             source: None,
             jd: String::new(),
         };
@@ -356,4 +361,6 @@ pub struct MinimalRow {
     pub job_id: String,
     pub jd: String,
     pub first_seen_at: String,
+    /// Same as full export: UTC time when this jobs.json was written.
+    pub crawl_exported_at_utc: String,
 }

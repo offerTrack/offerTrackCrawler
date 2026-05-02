@@ -63,6 +63,7 @@ impl JobStorage {
         for job in jobs {
             let sig = listing_signature_canonical_url(&job.url);
             let jid = stable_job_id_canonical_url(&job.url);
+            let canonical_jid = jid.clone();
             let raw_json = serde_json::to_string(&job.raw).unwrap_or_else(|_| "{}".to_string());
             let posted = job
                 .posted_date
@@ -76,10 +77,11 @@ impl JobStorage {
 
             if count > 0 {
                 tx.execute(
-                    r#"UPDATE jobs SET job_id=?1, title=?2, company=?3, location=?4, description=?5,
-                    url=?6, posted_date=?7, source=?8, raw_json=?9, last_seen_at=?10 WHERE signature=?11"#,
+                    r#"UPDATE jobs SET job_id=?1, canonical_job_id=?2, title=?3, company=?4, location=?5, description=?6,
+                    url=?7, posted_date=?8, source=?9, raw_json=?10, last_seen_at=?11 WHERE signature=?12"#,
                     params![
                         jid,
+                        canonical_jid,
                         job.title,
                         job.company,
                         job.location,
@@ -95,12 +97,13 @@ impl JobStorage {
                 updated += 1;
             } else {
                 tx.execute(
-                    r#"INSERT INTO jobs (signature, job_id, title, company, location, description, url,
+                    r#"INSERT INTO jobs (signature, job_id, canonical_job_id, title, company, location, description, url,
                     posted_date, source, raw_json, first_seen_at, last_seen_at)
-                    VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12)"#,
+                    VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12,?13)"#,
                     params![
                         sig,
                         jid,
+                        canonical_jid,
                         job.title,
                         job.company,
                         job.location,

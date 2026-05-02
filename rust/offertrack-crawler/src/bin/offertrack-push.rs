@@ -49,6 +49,12 @@ fn count_rows_missing_title_or_job_id(jobs: &[Value]) -> usize {
 async fn main() -> Result<()> {
     let args = Args::parse();
     let base = args.base_url.trim_end_matches('/').to_string();
+    let parsed_base = reqwest::Url::parse(&base).context("invalid OFFERTRACK_API_URL/base_url")?;
+    let host = parsed_base.host_str().unwrap_or_default().to_lowercase();
+    let is_local = host == "localhost" || host == "127.0.0.1" || host == "::1";
+    if !args.admin_key.is_empty() && !is_local && parsed_base.scheme() != "https" {
+        anyhow::bail!("refusing to send X-Admin-Key over non-HTTPS to non-localhost endpoint");
+    }
 
     let raw = std::fs::read_to_string(&args.jobs_file)
         .with_context(|| format!("read {}", args.jobs_file.display()))?;
